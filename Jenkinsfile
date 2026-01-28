@@ -39,6 +39,15 @@ pipeline {
 			}
 		}
 		
+		stage('Docker Build') {
+		    steps {
+		        echo 'Docker Build'
+		        sh '''
+		            docker build -t ${IMAGE_NAME} .
+		        '''
+		    }
+		}
+		
 		stage('DockerHub Push') {
 			steps {
 				echo 'Docker Hub Push'
