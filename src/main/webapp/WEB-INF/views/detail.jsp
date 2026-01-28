@@ -69,8 +69,7 @@
 				</tr>
 				<tr>
 					<td class="text-right">
-						<a href="#" class="btn btn-sm btn-success">찜하기</a> 
-						<a href="#" class="btn btn-sm btn-danger">예약하기</a> 
+						<a href="/find" class="btn btn-sm btn-danger">맛집 검색</a> 
 						<a href="/" class="btn btn-sm btn-info">목록</a>
 					</td>
 				</tr>
