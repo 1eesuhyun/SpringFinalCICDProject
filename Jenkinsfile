@@ -2,7 +2,8 @@ pipeline {
 	agent any
 	
 	environment {
-		IMAGE_NAME= 'leesuhyun1/boot-app:latest'
+		DOCKER_USER= 'leesuhyun1'
+		IMAGE_NAME= '${DOCKER_USER}/boot-app:latest'
 		CONTAINER_NAME= 'boot-app'
 	}
 	stages {
@@ -23,11 +24,26 @@ pipeline {
 			}
 		}
 		
-		stage('Docker Build') {
+		stage('Docker Hub Login') {
 			steps {
-				echo 'Docker Image Build'
+				echo 'DockerHub Login'
+				withCredentials([usernamePassword(
+					credentialsId: 'dockerhub-credential',
+					usernameVariable: 'DOCKER_ID',
+					passwordVariable: 'DOCKER_PW'
+				)]){
+					sh '''
+						echo $DOCKER_PW | docker login -u $DOCKER_ID --password-stdin
+					   '''
+				}
+			}
+		}
+		
+		stage('DockerHub Push') {
+			steps {
+				echo 'Docker Hub Push'
 				sh '''
-					docker build -t ${IMAGE_NAME} .
+					docker push ${IMAGE_NAME}
 				   '''
 			}
 		}
@@ -38,6 +54,8 @@ pipeline {
 				sh '''
 					docker stop ${CONTAINER_NAME} || true
 					docker rm ${CONTAINER_NAME} || true
+					
+					docker pull ${IMAGE_NAME}
 					
 					docker run --name ${CONTAINER_NAME} \
 					-it -d -p 9090:9090 \
