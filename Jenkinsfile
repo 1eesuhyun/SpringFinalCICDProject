@@ -4,7 +4,8 @@ pipeline{
    environment{
       DOCKER_USER = "leesuhyun1"
       IMAGE_NAME = "${DOCKER_USER}/boot-app:latest"
-      CONTAINER_NAME = "boot-app"
+      //CONTAINER_NAME = "boot-app"
+      COMPOSE_FILE = "docker-compose.yml"
    }
    
    stages{
@@ -59,7 +60,24 @@ pipeline{
          }   
       }
       
-      stage('Docker Run'){
+      stage('Docker Compose Down') {
+		steps {
+			echo ' docker-compose down'
+			sh '''
+				docker-compose -f ${COMPOSE_FILE} down || true
+			   '''
+		}
+	  }
+	  
+	  stage('Docker Compose Up') {
+		steps {
+			echo ' docker-compose up'
+			sh '''
+				docker-compose -f ${COMPOSE_FILE} up -d
+			   '''
+		}
+	  }
+      /*stage('Docker Run'){
          steps{
             echo 'Docker Run'
             sh '''
@@ -73,7 +91,7 @@ pipeline{
                ${IMAGE_NAME}
                '''
          }
-      }
+      }*/
    }
    
    post{
