@@ -4,7 +4,7 @@ pipeline{
    environment{
       DOCKER_IMAGE = "leesuhyun1/awscicd-app"
       DOCKER_TAG = "latest"
-      EC2_HOST = "ip"
+      EC2_HOST = "3.34.181.67"
       EC2_USER = "ubuntu"
    }
    
