@@ -67,7 +67,7 @@ pipeline{
                EOF
                """
                }
-         }   
+         }
       }
       
       /*stage('Docker Compose Down') {
