@@ -3,7 +3,7 @@ pipeline {
 	
 	environment {
 		DOCKER_USER= 'leesuhyun1'
-		IMAGE_NAME= '${DOCKER_USER}/boot-app:latest'
+		IMAGE_NAME= 'leesuhyun1/boot-app:latest'
 		CONTAINER_NAME= 'boot-app'
 	}
 	stages {
@@ -37,15 +37,6 @@ pipeline {
 					   '''
 				}
 			}
-		}
-		
-		stage('Docker Build') {
-		    steps {
-		        echo 'Docker Build'
-		        sh '''
-		            docker build -t ${IMAGE_NAME} .
-		        '''
-		    }
 		}
 		
 		stage('DockerHub Push') {
