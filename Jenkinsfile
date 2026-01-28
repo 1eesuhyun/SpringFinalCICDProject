@@ -2,20 +2,21 @@ pipeline{
    agent any
    
    environment{
-      DOCKER_USER = "leesuhyun1"
-      IMAGE_NAME = "${DOCKER_USER}/boot-app:latest"
-      CONTAINER_NAME = "boot-app"
-      COMPOSE_FILE = "docker-compose.yml"
+      DOCKER_IMAGE = "leesuhyun1/awscicd-app"
+      DOCKER_TAG = "latest"
+      EC2_HOST = "ip"
+      EC2_USER = "ubuntu"
    }
    
    stages{
+	// Git 연결 주소까지
       stage('Checkout'){
          steps{
             echo 'Git Checkout'
             checkout scm
          }
       }
-      
+      // 배포판 만들기
       stage('Gradlew Build'){
          steps{
             echo 'Gradle Build'
@@ -30,7 +31,7 @@ pipeline{
          steps{
             echo 'Docker Image Build'
             sh '''
-               docker build -t ${IMAGE_NAME} .
+               docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
                '''
          }
       }
@@ -45,31 +46,38 @@ pipeline{
                
             )]){
                sh '''
-                  echo $DOCKER_PW | docker login -u $DOCKER_ID --password-stdin
+                  echo "DOCKER_ID=$DOCKER_ID,DOCKER_PW=$DOCKER_PW"
+                  echo "$DOCKER_PW" | docker login -u "$DOCKER_ID" --password-stdin
+                  docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
                   '''
             }
          }
       }
       
-      stage('DockerHub Push'){
+      stage('Deploy to EC2'){
          steps{
-            echo 'Docker Hub Push'
-            sh '''
-               docker push ${IMAGE_NAME}
-               '''
+            echo 'Deploy to EC2'
+            sh """
+               ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
+                   docker stop awscicd || true
+                   docker rm awscicd || true
+                   docker pull ${DOCKER_IMAGE}:{DOCKER_TAG}
+                   docker run --name awscicd -it -d -p 9090:9090 ${DOCKER_IMAGE}:{DOCKER_TAG}
+               EOF
+               """
          }   
       }
       
-      stage('Docker Compose Down') {
+      /*stage('Docker Compose Down') {
 		steps {
 			echo ' docker-compose down'
 			sh '''
 				docker-compose -f ${COMPOSE_FILE} down || true
 			   '''
 		}
-	  }
+	  }*/
 	  
-	   stage('Docker Stop And RM') {
+	   /*stage('Docker Stop And RM') {
 		steps {
 			echo 'docker stop rm'
 			sh '''
@@ -87,7 +95,7 @@ pipeline{
 				docker-compose -f ${COMPOSE_FILE} up -d
 			   '''
 		}
-	  }
+	  }*/
       /*stage('Docker Run'){
          steps{
             echo 'Docker Run'
@@ -107,10 +115,10 @@ pipeline{
    
    post{
       success{
-         echo 'Docker 실행 성공'
+         echo 'CICD 실행 성공'
       }
       failure{
-         echo 'Docker 실행 실패'
+         echo 'CICD 실행 실패'
       }
    }
 }
